@@ -21,7 +21,10 @@ params = {'startX':'126.956167',
 res = requests.post(url, data=params)
 
 for i in res.json()['features']:
-	pprint.PrettyPrinter(indent=4).pprint(i['geometry']['coordinates'][0])
+	pprint.PrettyPrinter(indent=4).pprint(res.json()['features'])
+	#pprint.PrettyPrinter(indent=4).pprint(type(i['geometry']['coordinates'][0]))
+	#if type(i['geometry']['coordinates'][0]) == float :
+	#	print("true")
 
 	#res.json['features'][0]['properties']
 	#pprint.PrettyPrinter(indent=4).pprint(res.json()['features'])
