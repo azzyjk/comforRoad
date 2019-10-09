@@ -3,8 +3,8 @@ import json
 import pprint
 import time
 
-def mkGP(lon, lat):
-	Gparams = {'locations':str(lat)+", "+str(lon),
+def mkGP(x, y):
+	Gparams = {'locations':str(y)+", "+str(x),
 		  	   'key':keyG
 			  }
 	return Gparams
@@ -18,6 +18,8 @@ keyG = readG.read()
 
 Turl = 'https://apis.openapi.sk.com/tmap/routes/pedestrian'
 Gurl = 'https://maps.googleapis.com/maps/api/elevation/json'
+
+lists = []
 
 #Tmap parameters
 Tparams = {'version':'1',
@@ -34,17 +36,14 @@ Tparams = {'version':'1',
 #find the path
 Tres = requests.post(Turl, data=Tparams)
 
-#find elevation
-Gparams = mkGP( 126.56167,37.390458)
-
-Gres = requests.get(Gurl, params=Gparams)
-
-#pprint.PrettyPrinter(indent=4).pprint(Gres.json())
-
-lists = []
-
 for i in Tres.json()['features']:
 	if type(i['geometry']['coordinates'][0]) == float :
 		lists.append(i['geometry']['coordinates'])
-		
-print(type(str(lists[0])))
+
+#find elevation
+for i in lists:
+	Gparams = mkGP(i[0], i[1])
+
+	Gres = requests.get(Gurl, params=Gparams)
+	pprint.PrettyPrinter(indent=4).pprint(Gres.json()['results'][0]['elevation'])
+	
