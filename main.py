@@ -8,10 +8,10 @@ def average(lists):
 
 def mkKey(site):
 	if site == 0:
-		key = open('tmapKey.txt', mode='rt', encoding='utf-8')
+		key = open('/workspace/Python_test/final/Tmap/Test/txtFiles/tmapKey.txt', mode='rt', encoding='utf-8')
 
 	if site == 1:
-		key = open('gmapKey.txt', mode='rt', encoding='utf-8')
+		key = open('/workspace/Python_test/final/Tmap/Test/txtFiles/gmapKey.txt', mode='rt', encoding='utf-8')
 		
 	return key.read()
 
@@ -32,17 +32,30 @@ def mkTparaArnd(lon, lat, key):
 		  }
 	return params
 
-def mkTparaPth(key):
-	params = {'version':'1',
-			'startX':'126.956167', 
-		   'startY':'37.390458',
-		  'speed':'300',
-		   'endX':'126.956971', 
-		   'endY':'37.393164',
-		   'startName':'%EC%B6%9C%EB%B0%9C',
-		   'endName':'%EB%B3%B8%EC%82%AC',
-		   'appKey':key
-		  }
+def mkTparaPth(key, passList):
+	if passList == None:
+		params = {'version':'1',
+				  'startX':'126.956167', 
+				  'startY':'37.390458',
+				  'speed':'300',
+				  'endX':'126.956971', 
+				  'endY':'37.393164',
+		   		  'startName':'%EC%B6%9C%EB%B0%9C',
+		   		  'endName':'%EB%B3%B8%EC%82%AC',
+		   		  'appKey':key
+		  		 }
+	else : 
+		params = {'version':'1',
+				  'startX':'126.956167', 
+				  'startY':'37.390458',
+				  'speed':'300',
+				  'endX':'126.956971', 
+				  'endY':'37.393164',
+				  'passList':passList,
+		   		  'startName':'%EC%B6%9C%EB%B0%9C',
+		   		  'endName':'%EB%B3%B8%EC%82%AC',
+		   		  'appKey':key
+		  		 }
 	return params
 
 def findElevation(listPath, url, key):
@@ -67,9 +80,9 @@ Gkey = mkKey(GOOGLE)
 
 listPath = []
 listRoad = []
-
+psLst = None
 #Tmap find Path parameters
-pthParams = mkTparaPth(Tkey)
+pthParams = mkTparaPth(Tkey,psLst)
 
 #find path
 resPth = requests.post(pthUrl, data=pthParams)
@@ -93,6 +106,8 @@ for i in resArnd.json()['searchPoiInfo']['pois']['poi']:
 	eleParams = mkElepara(i['frontLon'], i['frontLat'], Gkey)
 	resEle = requests.get(eleUrl, params=eleParams)
 	listRoad.append(resEle.json()['results'][0]['elevation'])
-print(listRoad)
-	#print(i['name'], resEle.json()['results'][0]['elevation'])
+	print(i['name'], resEle.json()['results'][0]['elevation'])
+#print(listRoad.index(min(listRoad)))
+
+
 
