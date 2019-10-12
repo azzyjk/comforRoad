@@ -32,7 +32,7 @@ def mkTparaArnd(lon, lat, key):
 		  }
 	return params
 
-def mkTparaPth(key, passList):
+def mkTparaPth(passList, key):
 	if passList == None:
 		params = {'version':'1',
 				  'startX':'126.956167', 
@@ -79,10 +79,12 @@ Tkey = mkKey(SKT)
 Gkey = mkKey(GOOGLE)
 
 listPath = []
-listRoad = []
+listArndEle = []
+listLocat = []
+
 psLst = None
 #Tmap find Path parameters
-pthParams = mkTparaPth(Tkey,psLst)
+pthParams = mkTparaPth(psLst,Tkey)
 
 #find path
 resPth = requests.post(pthUrl, data=pthParams)
@@ -94,8 +96,8 @@ for i in resPth.json()['features']:
 
 #find elevation
 listEle = findElevation(listPath, eleUrl, Gkey)
-
-#Tmap around search parameters(max elevation location)
+print("max :",max(listEle),"min :",min(listEle),"avr :",(max(listEle)+min(listEle))/2)
+#Tmap around search parameters(The highest elevation lon&lat)
 arndParams = mkTparaArnd(listPath[listEle.index(max(listEle))][0],listPath[listEle.index(max(listEle))][1], Tkey)
 
 #search around max elevation location
@@ -105,9 +107,18 @@ resArnd = requests.get(arndUrl, params=arndParams)
 for i in resArnd.json()['searchPoiInfo']['pois']['poi']:
 	eleParams = mkElepara(i['frontLon'], i['frontLat'], Gkey)
 	resEle = requests.get(eleUrl, params=eleParams)
-	listRoad.append(resEle.json()['results'][0]['elevation'])
-	print(i['name'], resEle.json()['results'][0]['elevation'])
-#print(listRoad.index(min(listRoad)))
+	listArndEle.append(resEle.json()['results'][0]['elevation'])
+	listLocat.append(resEle.json()['results'][0]['location'])
+	
+	
+psLst = str(listLocat[listEle.index(min(listEle))]['lng'])+","+ str(listLocat[listEle.index(min(listEle))]['lat'])
 
+pthParams = mkTparaPth(psLst,Tkey)
+resPth = requests.post(pthUrl, data=pthParams)
 
-
+for i in resPth.json()['features']:
+	if type(i['geometry']['coordinates'][0]) == float :
+		listPath.append(i['geometry']['coordinates'])
+		
+listEle = findElevation(listPath, eleUrl, Gkey)
+print("max :",max(listEle),"min :",min(listEle),"avr :",(max(listEle)+min(listEle))/2)
