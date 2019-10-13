@@ -1,6 +1,4 @@
-import json
 import pprint
-import time
 from function import *
 
 #basic setting
@@ -11,6 +9,7 @@ pthUrl = 'https://apis.openapi.sk.com/tmap/routes/pedestrian'
 arndUrl = 'https://apis.openapi.sk.com/tmap/pois/search/around'
 eleUrl = 'https://maps.googleapis.com/maps/api/elevation/json'
 poiUrl = 'https://apis.openapi.sk.com/tmap/pois'
+imageUrl = 'https://apis.openapi.sk.com/tmap/routeStaticMap?'
 
 Tkey = mkKey(SKT)
 Gkey = mkKey(GOOGLE)
@@ -41,5 +40,7 @@ listEle = findElevation(listPath, eleUrl, Gkey)
 
 print("max :",max(listEle),"min :",min(listEle),"avr :",average(listEle))
 
+noticePath(stX, stY, edX, edY, psLst, pthUrl, Tkey)
 
+openWeb(stX, stY, edX, edY, psLst, imageUrl, Tkey)
 #add webopen

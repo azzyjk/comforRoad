@@ -2,6 +2,7 @@ import requests
 import json
 import pprint
 import time
+import webbrowser
 import os
 
 def average(lists):
@@ -147,3 +148,41 @@ def findPOI(url ,key):
 	edX = resEd.json()['searchPoiInfo']['pois']['poi'][chEd]['frontLon']
 	edY = resEd.json()['searchPoiInfo']['pois']['poi'][chEd]['frontLat']
 	return stX, stY, edX, edY
+
+def noticePath(stX, stY, edX, edY, passList, url, key):
+	params=mkTparaPth(stX, stY, edX, edY, passList, key)
+	res = requests.post(url,data=params)
+
+	for i in res.json()['features'] :
+		x = "turnType" in i['properties']
+		y = "time" in i['properties']
+		if(x==True):
+			direct = i['properties']['turnType']
+			if direct==12 or direct==212:
+				print('left')
+			elif direct==13 or direct==213:
+				print('right')	
+			elif direct==16 or direct==214:
+				print('8시')
+			elif direct==17 or direct==215:
+				print('10시')
+			elif direct==18 or direct==216:
+				print('2시')
+			elif direct==19 or direct==217:
+				print('4시')
+			else:
+				print('straight')
+			
+		if(y==True):
+			delayTime = i['properties']['time']
+			#time.sleep(delayTime/10)
+			
+			
+def openWeb(stX, stY, edX, edY, passList, url, key):
+	key = "appKey="+str(key)
+	route = "startX="+str(stX)+"&startY="+str(stY)+"&endX="+edX+"&endY="+edY
+	passlist = "passList="+str(passList)
+	print(url+key+"&"+route+"&"+passlist)
+	return key+"&"+route+"&"+passlist
+	
+#add notice to findPthList()
