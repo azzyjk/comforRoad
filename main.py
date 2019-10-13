@@ -3,7 +3,6 @@ import pprint
 import time
 from function import *
 
-
 #basic setting
 SKT=0
 GOOGLE=1
@@ -15,9 +14,6 @@ poiUrl = 'https://apis.openapi.sk.com/tmap/pois'
 
 Tkey = mkKey(SKT)
 Gkey = mkKey(GOOGLE)
-
-listArndEle = []
-listLocat = []
 
 psLst = None
 #start
@@ -37,10 +33,10 @@ resArnd = findArnd(listPath, listEle, arndUrl, Tkey)
 #find & save around location's elevation & lon & lat
 listArndEle, listLocat=findArndEle(resArnd, eleUrl, Gkey)
 
-psLst = str(listLocat[listArndEle.index(min(listArndEle))]['lng'])+","+ str(listLocat[listArndEle.index(min(listArndEle))]['lat'])
+psLst = addPasslist(listLocat, listArndEle)
 
 listPath = findPthList(stX, stY, edX, edY, psLst, pthUrl, Tkey)
-###############################33
+
 listEle = findElevation(listPath, eleUrl, Gkey)
 
 print("max :",max(listEle),"min :",min(listEle),"avr :",average(listEle))

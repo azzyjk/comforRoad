@@ -16,6 +16,9 @@ def mkKey(site):
 		
 	return key.read()
 
+def addPasslist(listLocat, listArndEle):
+	return str(listLocat[listArndEle.index(min(listArndEle))]['lng'])+","+ str(listLocat[listArndEle.index(min(listArndEle))]['lat'])
+
 def mkElepara(lon, lat, key):
 	params = {'locations':str(lat)+", "+str(lon),
 		  	   'key':key
@@ -119,12 +122,12 @@ def search(add, url, param):
 		print("%d. " %number, i['name'] )
 		number+=1
 		
-	choose = input("번호를 선택해주세요 : ")
+	choose = input("Choose the number : ")
 	return int(choose), res
 
 def findPOI(url ,key):
 	os.system("clear")
-	addSt = input("출발지 : ")
+	addSt = input("Start Point : ")
 
 	params = mkPoipara(addSt, key)
 	chSt, resSt = search(addSt, url, params)
@@ -134,7 +137,7 @@ def findPOI(url ,key):
 
 	os.system("clear")
 
-	addEd = input("도착지 : ")
+	addEd = input("End Point : ")
 
 	params = mkPoipara(addEd, key)
 	chEd, resEd = search(addSt, url, params)
