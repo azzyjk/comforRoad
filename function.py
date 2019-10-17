@@ -39,7 +39,7 @@ def mkTparaArnd(lon, lat, key):
 		   'centerLon':lon,
 		  'centerLat':lat,
 		  'page':'1',
-		  'count':'5',
+		  'count':'20',
 		 # 'categories':'편의점;한식;한의원',
 		  'appKey':key
 		  }
@@ -186,3 +186,4 @@ def openWeb(stX, stY, edX, edY, passList, url, key):
 	return key+"&"+route+"&"+passlist
 	
 #add notice to findPthList()
+#텍스트 파일에서 위도경도 읽어와서 현재위치에따른 방향 알려주기
