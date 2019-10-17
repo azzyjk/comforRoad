@@ -45,25 +45,25 @@ def mkTparaArnd(lon, lat, key):
 		  }
 	return params
 
-def mkTparaPth(stX, stY, edX, edY, passList, key):
+def mkTparaPth(lists, passList, key):
 	if passList == None:
 		params = {'version':'1',
-				  'startX':stX, 
-				  'startY':stY,
+				  'startX':lists[0], 
+				  'startY':lists[1],
 				  'speed':'300',
-				  'endX':edX, 
-				  'endY':edY,
+				  'endX':lists[2], 
+				  'endY':lists[3],
 		   		  'startName':'%EC%B6%9C%EB%B0%9C',
 		   		  'endName':'%EB%B3%B8%EC%82%AC',
 		   		  'appKey':key
 		  		 }
 	else : 
 		params = {'version':'1',
-				  'startX':stX, 
-				  'startY':stY,
+				  'startX':lists[0], 
+				  'startY':lists[1],
 				  'speed':'300',
-				  'endX':edX, 
-				  'endY':edY,
+				  'endX':lists[2], 
+				  'endY':lists[3],
 				  'passList':passList,
 		   		  'startName':'%EC%B6%9C%EB%B0%9C',
 		   		  'endName':'%EB%B3%B8%EC%82%AC',
@@ -81,12 +81,12 @@ def findElevation(listPath, url, key):
 		lists.append(res.json()['results'][0]['elevation'])
 	return lists
 
-def findPthList(stX, stY, edX, edY ,psLst, url, key):
+def findPthList(drList ,psLst, url, key):
 	lists = []
 	
-	pthParams = mkTparaPth(stX, stY, edX, edY, psLst, key)
+	pthParams = mkTparaPth(drList, psLst, key)
 	resPth = requests.post(url, data=pthParams)
-	#pprint.PrettyPrinter(indent=4).pprint(resPth.json())
+	
 	for i in resPth.json()['features']:
 		if type(i['geometry']['coordinates'][0]) == float :
 			lists.append(i['geometry']['coordinates'])
@@ -124,33 +124,39 @@ def search(add, url, param):
 		number+=1
 		
 	choose = input("Choose the number : ")
-	return int(choose), res
+	return res.json()['searchPoiInfo']['pois']['poi'][int(choose)]
 
 def findPOI(url ,key):
 	os.system("clear")
 	addSt = input("Start Point : ")
 
 	params = mkPoipara(addSt, key)
-	chSt, resSt = search(addSt, url, params)
+	resSt = search(addSt, url, params)
 
-	stX = resSt.json()['searchPoiInfo']['pois']['poi'][chSt]['frontLon']
-	stY = resSt.json()['searchPoiInfo']['pois']['poi'][chSt]['frontLat']
+	startName = resSt['name']
+	stX = resSt['frontLon']
+	stY = resSt['frontLat']
 
 	os.system("clear")
 
 	addEd = input("End Point : ")
 
 	params = mkPoipara(addEd, key)
-	chEd, resEd = search(addSt, url, params)
+	resEd = search(addSt, url, params)
 	
 	os.system("clear")
 
-	edX = resEd.json()['searchPoiInfo']['pois']['poi'][chEd]['frontLon']
-	edY = resEd.json()['searchPoiInfo']['pois']['poi'][chEd]['frontLat']
-	return stX, stY, edX, edY
+	endName = resEd['name']
+	edX = resEd['frontLon']
+	edY = resEd['frontLat']
+	
+	print(f'start : {startName} -> end : {endName}\n')
+	
+	lists = [stX, stY, edX, edY]
+	return lists
 
-def noticePath(stX, stY, edX, edY, passList, url, key):
-	params=mkTparaPth(stX, stY, edX, edY, passList, key)
+def noticePath(drList, passList, url, key):
+	params=mkTparaPth(drList, passList, key)
 	res = requests.post(url,data=params)
 
 	for i in res.json()['features'] :
@@ -178,12 +184,43 @@ def noticePath(stX, stY, edX, edY, passList, url, key):
 			#time.sleep(delayTime/10)
 			
 			
-def openWeb(stX, stY, edX, edY, passList, url, key):
+def openWeb(drList, passList, url, key):
 	key = "appKey="+str(key)
-	route = "startX="+str(stX)+"&startY="+str(stY)+"&endX="+edX+"&endY="+edY
+	route = "startX="+str(drList[0])+"&startY="+str(drList[1])+"&endX="+str(drList[2])+"&endY="+str(drList[3])
 	passlist = "passList="+str(passList)
 	print(url+key+"&"+route+"&"+passlist)
 	return key+"&"+route+"&"+passlist
 	
-#add notice to findPthList()
-#텍스트 파일에서 위도경도 읽어와서 현재위치에따른 방향 알려주기
+def fastRoad(drList, url, key):
+	psLst = None
+	
+	#notice path
+	openWeb(drList, psLst, url['image'], key['tmap'])
+	noticePath(drList, psLst, url['path'], key['tmap'])
+	
+def comforRoad(drList, url, key):
+	psLst = None
+	
+	#find path & path's elevation
+	listPath = findPthList(drList ,psLst, url['path'], key['tmap'])
+	listEle = findElevation(listPath, url['ele'], key['gmap'])
+	print("max :",max(listEle),"min :",min(listEle),"avr :",average(listEle))
+	
+	#find location & elevation around the highest location
+	resArnd = findArnd(listPath, listEle, url['around'], key['tmap'])
+	listArndEle, listLocat=findArndEle(resArnd, url['ele'], key['gmap'])
+	
+	psLst = addPasslist(listLocat, listArndEle)
+	
+	listPath = findPthList(drList ,psLst, url['path'], key['tmap'])
+	listEle = findElevation(listPath, url['ele'], key['gmap'])
+	print("max :",max(listEle),"min :",min(listEle),"avr :",average(listEle))
+	
+	openWeb(drList, psLst, url['image'], key['tmap'])
+	noticePath(drList, psLst, url['path'], key['tmap'])
+	
+def menu():
+	print("Choose Number")
+	print("0. To find & notice fast road")
+	print("1. To find & notice comfortable road")
+
